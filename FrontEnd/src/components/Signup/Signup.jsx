@@ -1,34 +1,43 @@
-"use client"
-import { Button,ToastContainer } from "@cred/neopop-web/lib/components";
-import { useRouter } from 'next/navigation'
+"use client";
+import { Button, ToastContainer } from "@cred/neopop-web/lib/components";
+import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
 import { useState, useEffect } from "react";
-// import {redirect, validatePassword, onSubmit, handleToastMessages} from "@utils/Signup"
+import { redirect, onSubmit, validatePassword, handleToastMessages } from "@/utils/Signup";
+import { useMutation } from '@apollo/client';
+import SIGNUP from "./query";
 
 const Signup = () => {
-  const router = useRouter()
-  const {register, handleSubmit,watch,formState: { errors, isSubmitting, isValid, isSubmitSuccessful},} = useForm();
+  const router = useRouter();
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isValid, isSubmitSuccessful }, setError, clearErrors, setValue } = useForm();
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [signUp, { loading, error, data }] = useMutation(SIGNUP);
 
-// useEffect(() => {
-//   handleToastMessages( errorMessage,setErrorMessage,isSubmitting,isValid,successMessage,setSuccessMessage)
-// }, [errorMessage, isSubmitting , successMessage])
+  useEffect(() => {
+    handleToastMessages(errorMessage, setErrorMessage, isSubmitting, isValid, successMessage, setSuccessMessage);
+  }, [errorMessage, isSubmitting, successMessage]);
 
-// useEffect(() => {
-//   redirect(navigate, isSubmitSuccessful, errorMessage)
-// }, [isSubmitSuccessful]);
+  useEffect(() => {
+    redirect(router, isSubmitSuccessful, errorMessage);
+  }, [isSubmitSuccessful]);
 
+  const handleFormSubmit = handleSubmit(async (data) => {
+    try {
+      await onSubmit(signUp, data, setSuccessMessage, setErrorMessage);
+    } catch (error) {
+      setError("formError", { type: "manual", message: error.message });
+    }
+  });
 
   return (
     <section className="bg-white">
-       <ToastContainer />
+      <ToastContainer />
       <div className="container flex items-center justify-center min-h-screen px-6 mx-auto">
-        <form className="w-full max-w-md" >
-         {/* onSubmit={handleSubmit((data) => onSubmit(data, setErrorMessage, setSuccessMessage))}> */}
+        <form className="w-full max-w-md" onSubmit={handleFormSubmit}>
           <div className="flex justify-center mx-auto">
             <img
               className="w-auto h-12 sm:h-8 cursor-pointer"
@@ -106,89 +115,88 @@ const Signup = () => {
           </div>
 
           <div className="relative flex items-center mt-4">
-          <span className="absolute">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6 mx-3 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
+            <span className="absolute">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 mx-3 text-gray-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </span>
+
+            <input
+              type={showPassword ? "text" : "password"}
+              className="block w-full px-10 py-3 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+              placeholder="Password"
+              {...register("password", {
+                required: "* Password is required",
+                minLength: { value: 8, message: "* Password too short" },
+                validate: validatePassword,
+              })}
+            />
+            <button
+              type="button"
+              className="absolute right-3"
+              onClick={() => setShowPassword(!showPassword)}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </span>
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+          <div className="mt-1 text-red-500 text-sm">
+            {errors.password && <span>{errors.password.message}</span>}
+          </div>
 
-          <input
-            type={showPassword ? "text" : "password"}
-            className="block w-full px-10 py-3 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-            placeholder="Password"
-            {...register("password", {
-              required: "* Password is required",
-              minLength: { value: 5, message: "* Password too short" },
-              maxLength: { value: 15, message: "* Password too long" },
-              // validate: validatePassword,
-            })}
-          />
-          <button
-            type="button"
-            className="absolute right-3"
-            onClick={() => setShowPassword(!showPassword)}
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
-        </div>
-        <div className="mt-1 text-red-500 text-sm">
-          {errors.password && <span>{errors.password.message}</span>}
-        </div>
+          <div className="relative flex items-center mt-4">
+            <span className="absolute">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-6 h-6 mx-3 text-gray-300"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
+            </span>
 
-        <div className="relative flex items-center mt-4">
-          <span className="absolute">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6 mx-3 text-gray-300"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth="2"
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              className="block w-full px-10 py-3 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
+              placeholder="Confirm Password"
+              onCopy={(e) => e.preventDefault()}
+              onPaste={(e) => e.preventDefault()}
+              {...register("confirm_password", {
+                required: "* Confirm Password is required",
+                validate: (value) =>
+                  value === watch("password") || "* Passwords do not match",
+              })}
+            />
+            <button
+              type="button"
+              className="absolute right-3"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-              />
-            </svg>
-          </span>
-
-          <input
-            type={showConfirmPassword ? "text" : "password"}
-            className="block w-full px-10 py-3 text-gray-700 bg-white border rounded-lg focus:border-blue-400 focus:ring-blue-300 focus:outline-none focus:ring focus:ring-opacity-40"
-            placeholder="Confirm Password"
-            onCopy={(e) => e.preventDefault()}
-            onPaste={(e) => e.preventDefault()}
-            {...register("confirm_password", {
-              required: "* Confirm Password is required",
-              validate: (value) =>
-                value === watch("password") || "* Passwords do not match",
-            })}
-          />
-          <button
-            type="button"
-            className="absolute right-3"
-            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-          >
-            {showConfirmPassword ? "Hide" : "Show"}
-          </button>
-        </div>
-        <div className="mt-1 text-red-500 text-sm">
-          {errors.confirm_password && (
-            <span>{errors.confirm_password.message}</span>
-          )}
-        </div>
+              {showConfirmPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+          <div className="mt-1 text-red-500 text-sm">
+            {errors.confirm_password && (
+              <span>{errors.confirm_password.message}</span>
+            )}
+          </div>
 
           <div className="mt-6 flex justify-center">
             <Button
@@ -202,7 +210,12 @@ const Signup = () => {
               Sign up
             </Button>
           </div>
-        
+
+          {errors.formError && (
+            <div className="mt-4 text-red-500 text-sm">
+              <span>{errors.formError.message}</span>
+            </div>
+          )}
         </form>
       </div>
     </section>

@@ -32,22 +32,23 @@ model AllBlogs {
   createdAt DateTime @default(now())
 }
 
-model User {
+model Users {
   id              String     @id @default(auto()) @map("_id") @db.ObjectId
+  username        String     @unique
   email           String     @unique
   password        String
-  image           String
-  phone_number    String
-  resetToken      String     @unique
-  expiry_of_Token DateTime
-  createdAt       DateTime   @default(now())
-  blogs           UserBlog[] @relation("UserBlogs")
+  image           String?
+  phone_number    String?    @unique
+  resetToken      String?    @unique
+  expiry_of_Token DateTime?
+  createdAt       DateTime?  @default(now())
+  blogs           UserBlogs[] @relation("UserBlogs")
 }
 
-model UserBlog {
+model UserBlogs {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   user_id   String   @db.ObjectId
-  user      User     @relation(fields: [user_id], references: [id], name: "UserBlogs")
+  user      Users     @relation(fields: [user_id], references: [id], name: "UserBlogs")
   title     String
   author    String
   date      String
@@ -56,5 +57,3 @@ model UserBlog {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 }
-
-

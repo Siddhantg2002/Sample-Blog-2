@@ -1,17 +1,17 @@
 import { showToast } from "@cred/neopop-web/lib/components";
 
 const delay = (d) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     setTimeout(() => {
       resolve();
     }, d * 1000);
   });
 };
 
-const redirect = async (navigate, isSubmitSuccessful, errorMessage) => {
+const redirect = async (router, isSubmitSuccessful, errorMessage) => {
   if (isSubmitSuccessful && !errorMessage) {
     await delay(2);
-    navigate("/login");
+    router.push("/login");
   }
 };
 
@@ -30,48 +30,22 @@ const validatePassword = (value) => {
     return "* Password must include at least one special character";
   }
 
-  // Strength evaluation
-  if (hasMinLength && hasNumber && hasSpecialChar) {
-    return true; // Strong password
-  } else if (hasMinLength && (hasNumber || hasSpecialChar)) {
-    return "* Password strength: Medium";
-  } else {
-    return "* Password strength: Weak";
-  }
+  return true; // Strong password
 };
 
-
- const onSubmit = async (data, setErrorMessage, setSuccessMessage) => {
+const onSubmit = async (signUp, formData, setSuccessMessage, setErrorMessage) => {
   await delay(3);
   try {
-    const response = await fetch("http://localhost:3000/sign-up", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.message);
-    } else {
-      setSuccessMessage("Account created successfully");
+    const response = await signUp({ variables: {username: formData.username, email: formData.email, password: formData.password } });
+    if (response.data) {
+      setSuccessMessage("Sign up successful!");
     }
   } catch (error) {
-    console.error("Error:", error.message);
     setErrorMessage(error.message);
   }
 };
 
-const handleToastMessages = (
-  errorMessage,
-  setErrorMessage,
-  isSubmitting,
-  isValid,
-  successMessage,
-  setSuccessMessage
-) => {
+const handleToastMessages = (errorMessage, setErrorMessage, isSubmitting, isValid, successMessage, setSuccessMessage) => {
   if (errorMessage) {
     showToast(errorMessage, { type: "error", autoCloseTime: "2000" });
     setErrorMessage("");
