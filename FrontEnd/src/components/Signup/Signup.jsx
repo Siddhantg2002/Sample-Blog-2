@@ -1,53 +1,34 @@
 "use client";
-import { Button, ToastContainer } from "@cred/neopop-web/lib/components";
+import { Button, ToastContainer,showToast } from "@cred/neopop-web/lib/components";
 import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
 import { useState, useEffect } from "react";
-import { redirect, onSubmit, validatePassword, handleToastMessages } from "@/utils/Signup";
+import { onSubmit, validatePassword} from "@/utils/Signup";
 import { useMutation } from '@apollo/client';
 import SIGNUP from "./query";
 
 const Signup = () => {
   const router = useRouter();
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isValid, isSubmitSuccessful }, setError, clearErrors, setValue } = useForm();
-  const [errorMessage, setErrorMessage] = useState("");
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isValid, isSubmitSuccessful }} = useForm();
   const [successMessage, setSuccessMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [signUp, { loading, error, data }] = useMutation(SIGNUP);
+  const [signUp, { data, error }] = useMutation(SIGNUP);
 
   useEffect(() => {
-    handleToastMessages(errorMessage, setErrorMessage, isSubmitting, isValid, successMessage, setSuccessMessage);
-  }, [errorMessage, isSubmitting, successMessage]);
-
-  useEffect(() => {
-    redirect(router, isSubmitSuccessful, errorMessage);
-  }, [isSubmitSuccessful]);
-
-  const handleFormSubmit = handleSubmit(async (data) => {
-    try {
-      await onSubmit(signUp, data, setSuccessMessage, setErrorMessage);
-    } catch (error) {
-      setError("formError", { type: "manual", message: error.message });
-    }
-  });
-
+    console.log(data)
+  }, [data]);
+  
   return (
     <section className="bg-white">
-      <ToastContainer />
       <div className="container flex items-center justify-center min-h-screen px-6 mx-auto">
-        <form className="w-full max-w-md" onSubmit={handleFormSubmit}>
-          <div className="flex justify-center mx-auto">
-            <img
-              className="w-auto h-12 sm:h-8 cursor-pointer"
-              src="/home/Logo.png"
-              alt="logo"
-              onClick={() => {
-                router.push("/");
-              }}
-            />
-          </div>
+      <div className="mt-4 text-red-500 text-sm absolute top-[10.5cm]">
+                {isValid && isSubmitting && <span>Submitting...</span>}
+                {error && <p>{error.message}</p>}
+                {successMessage && <p>{successMessage}</p>}
+            </div>
+        <form className="w-full max-w-md"  onSubmit={handleSubmit((data) => onSubmit(signUp, data, setSuccessMessage, router))}>
           <div className="relative flex items-center mt-8">
             <span className="absolute">
               <svg
@@ -210,12 +191,6 @@ const Signup = () => {
               Sign up
             </Button>
           </div>
-
-          {errors.formError && (
-            <div className="mt-4 text-red-500 text-sm">
-              <span>{errors.formError.message}</span>
-            </div>
-          )}
         </form>
       </div>
     </section>

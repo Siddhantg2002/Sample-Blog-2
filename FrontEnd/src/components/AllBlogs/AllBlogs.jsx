@@ -22,6 +22,7 @@ const AllBlogs = ({ params }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredData, setFilteredData] = useState(null);
 
+
   useEffect(() => {
     if (data && data.get_paginated_ALL_blog) {
       if (searchQuery) {

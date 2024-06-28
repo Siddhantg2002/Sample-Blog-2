@@ -1,4 +1,3 @@
-import { showToast } from "@cred/neopop-web/lib/components";
 
 const delay = (d) => {
   return new Promise((resolve) => {
@@ -8,12 +7,6 @@ const delay = (d) => {
   });
 };
 
-const redirect = async (router, isSubmitSuccessful, errorMessage) => {
-  if (isSubmitSuccessful && !errorMessage) {
-    await delay(2);
-    router.push("/login");
-  }
-};
 
 const validatePassword = (value) => {
   const hasNumber = /\d/.test(value);
@@ -33,30 +26,20 @@ const validatePassword = (value) => {
   return true; // Strong password
 };
 
-const onSubmit = async (signUp, formData, setSuccessMessage, setErrorMessage) => {
+const onSubmit = async (signUp, formData, setSuccessMessage, router) => {
   await delay(3);
-  try {
-    const response = await signUp({ variables: {username: formData.username, email: formData.email, password: formData.password } });
-    if (response.data) {
+    const response = await signUp({ 
+      variables: { 
+        username: formData.username, 
+        email: formData.email, 
+        password: formData.password 
+      } 
+    });
+    if (response.data && response.data.createUser) {
       setSuccessMessage("Sign up successful!");
+      await delay(2)
+      router.push("/login")
     }
-  } catch (error) {
-    setErrorMessage(error.message);
-  }
 };
 
-const handleToastMessages = (errorMessage, setErrorMessage, isSubmitting, isValid, successMessage, setSuccessMessage) => {
-  if (errorMessage) {
-    showToast(errorMessage, { type: "error", autoCloseTime: "2000" });
-    setErrorMessage("");
-  }
-  if (isSubmitting && isValid) {
-    showToast("Submitting...", { type: "warning", autoCloseTime: "3000" });
-  }
-  if (successMessage) {
-    showToast(successMessage, { type: "success", autoCloseTime: "2000" });
-    setSuccessMessage("");
-  }
-};
-
-export { redirect, validatePassword, onSubmit, handleToastMessages };
+export { validatePassword, onSubmit };

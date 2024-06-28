@@ -1,18 +1,20 @@
 "use client"
-import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import isEmail from "validator/lib/isEmail";
 import { useAuth } from "@/Auth/AuthContext";
-// import { onSubmit, handleGoogleLoginSuccess, handleGoogleLoginError } from "@utils/Login";
+import { onSubmit } from "@/utils/Login";
 import style from "./styles.module.css";
 import { Button } from "@cred/neopop-web/lib/components";
 import Carousel from "../utils/Carousel/Carousel";
 import Link from "next/link";
 import { useRouter } from 'next/navigation'
+import LOGIN from "./query"
+import { useMutation } from '@apollo/client';
+
 
 const Login = () => {
+  const [UserLogin, { error }] = useMutation(LOGIN);
   const router = useRouter()
-  const [CredentialError, setCredentialError] = useState(null);
   const { login } = useAuth();
   const { register, handleSubmit, formState: { errors } } = useForm();
 
@@ -23,7 +25,7 @@ const Login = () => {
             <Carousel />
           </div>
           <form 
-            // onSubmit={handleSubmit((data) => onSubmit(data, login, setCredentialError, navigate))}
+            onSubmit={handleSubmit((data) => onSubmit(data, UserLogin, login, router))}
             className="w-full px-6 py-8 md:px-8 lg:w-1/2"
           >
             <div className="flex justify-center mx-auto">
@@ -96,7 +98,7 @@ const Login = () => {
               {errors.password && <span>{errors.password.message}</span>}
             </div>
             <div className="flex justify-center mt-3 text-red-500 text-sm font-semibold">
-              {CredentialError}
+              {error && <p>{error.message}</p>}
             </div>
             <div className="mt-6 flex justify-center">
               <Button

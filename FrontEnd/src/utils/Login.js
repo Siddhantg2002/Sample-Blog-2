@@ -1,30 +1,30 @@
 import Cookies from 'js-cookie';
-import axios from 'axios';
+// import axios from 'axios';
 
-const onSubmit = async (data, login, setCredentialError, navigate) => {
+
+const onSubmit = async (formData, UserLogin, login, router) => {
     try {
-        const response = await fetch("http://localhost:3000/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(data),
-            credentials: 'include',
-        });
-        const result = await response.json();
-
-        if (response.ok) {
-            login();
-            navigate('/');
-            window.location.reload()
-        } else {
-            throw new Error(result.error);
+      const response = await UserLogin({
+        variables: {
+          email: formData.email,
+          password: formData.password
         }
+      });
+  
+      if (response) {
+        console.log(response.data)
+        const token = Cookies.get("jwt"); 
+        if (token) {
+          console.log("Authorization token:", token); 
+        } else {
+          console.log("Authorization cookie not found");
+        }
+      }
     } catch (error) {
-        console.error("Error:", error.message);
-        setCredentialError(error.message);
+      console.error("Login failed:", error.message);
+      // Handle login errors as needed
     }
-};
+  };
 
 const handleGoogleLoginSuccess = async (response, login, navigate, setCredentialError) => {
     const token = response.credential;
