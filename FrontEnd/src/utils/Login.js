@@ -12,13 +12,8 @@ const onSubmit = async (formData, UserLogin, login, router) => {
       });
   
       if (response) {
-        console.log(response.data)
-        const token = Cookies.get("jwt"); 
-        if (token) {
-          console.log("Authorization token:", token); 
-        } else {
-          console.log("Authorization cookie not found");
-        }
+        login()
+        console.log(response)
       }
     } catch (error) {
       console.error("Login failed:", error.message);

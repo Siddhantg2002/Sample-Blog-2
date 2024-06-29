@@ -4,10 +4,10 @@ import Cookies from 'js-cookie';
 
 const AuthContext = createContext();
 
-export const AuthProvider = ({ children }) => {
+export const AuthProvider =  ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const token = Cookies.get('jwt');
+  const token =  Cookies.get('jwt');
   const google_token = Cookies.get('google_jwt');
 
   useEffect(() => {
@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
   const login = () => {
     if (token || google_token) {
       setIsAuthenticated(true);
+      console.log(token)
     } else {
       console.log("No token found");
     }

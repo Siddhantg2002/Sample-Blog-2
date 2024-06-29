@@ -120,7 +120,6 @@ const UserResolvers = {
         if (isMatch) {
           const token = await createToken(user.id);
           res.cookie("jwt", token)
-          console.log(token)
           return true;
         }
         throw new GraphQLError("Incorrect Password", {
